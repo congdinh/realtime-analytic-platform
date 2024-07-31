@@ -189,8 +189,9 @@ services:
   # Airflow sequency need change to celery on product
   airflow:
     build:
-      context: .
-    image: airflow:latest
+      context: ./app_airflow/
+      dockerfile: ./Dockerfile.py37
+    image: realtime-analytic-platform/airflow:local
     container_name: airflow
     restart: unless-stopped
     depends_on:
