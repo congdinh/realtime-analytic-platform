@@ -1,0 +1,80 @@
+version: '3.8'
+
+volumes:
+  pg_metadata_data: {}
+  middle_var: {}
+  historical_var: {}
+  broker_var: {}
+  coordinator_var: {}
+  router_var: {}
+  druid_shared: {}
+  kafka_data: {}
+  metabase_data: {}
+
+networks:
+  default:
+    driver: bridge
+
+services:
+  kafka:
+    image: bitnami/kafka:latest
+    container_name: kafka
+    volumes:
+      - kafka_data:/bitnami
+    ports:
+      - 9094:9094
+    environment:
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      # KRaft settings
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@127.0.0.1:9093
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - BITNAMI_DEBUG=yes
+      - KAFKA_CFG_NUM_PARTITIONS=3
+      # Listeners
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://127.0.0.1:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - '9080:8080'
+    environment:
+      - DYNAMIC_CONFIG_ENABLED=true
+      - LOGGING_LEVEL_ROOT=DEBUG
+      - KAFKA_CLUSTERS_0_NAME=Kafka_Cluster
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_AUDIT_TOPICAUDITENABLED=true
+      - KAFKA_CLUSTERS_0_AUDIT_CONSOLEAUDITENABLED=true
+    depends_on:
+      - kafka
+
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase
+    volumes:
+      - metabase_data:/metabase.db
+    ports:
+      - 3000:3000
+    environment:
+      MB_DB_CONNECTION_URI: jdbc:postgresql://postgres:5432/postgres?user=postgres&password=postgres
+      MB_DB_TYPE: postgres
+    healthcheck:
+      test: curl --fail -I http://localhost:3000/api/health || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  superset:
+    image: amancevice/superset:latest
+    container_name: superset
+    restart: unless-stopped
+    ports:
+      - 3088:8088
