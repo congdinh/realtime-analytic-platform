@@ -18,11 +18,34 @@ This repo gives an introduction to setting up streaming analytics using open sou
 
 ![](./public/kafka-druid-metabase-dataflow.png)
 
+### What is Druid?
+
+Druid is an open-source analytics data store designed for business intelligence (OLAP) queries on event data. Druid provides low latency (real-time) data ingestion, flexible data exploration, and fast data aggregation. Existing Druid deployments have scaled to trillions of events and petabytes of data. Druid is most commonly used to power user-facing analytic applications.
+
+```bash
+The compose file will launch :
+- 1 zookeeper node
+- 1 postgres database
+
+and the following druid services :
+- 1 broker
+- 1 overlord
+- 1 middlemanager
+- 1 historical
+- 1 historical
+```
+
+> The image contains the full druid distribution and use the default druid cli. If no command is provided the image will run as a broker.
+> If you plan to use this image on your local machine, be careful with the JVM heap spaces required by default (some services are launched with 15gb heap space).
+
 ### Getting Started
 
 - Clone the repository
 - Navigate to the project directory
 - Run docker-compose up -d to start all services: `cd realtime-analytic-platform && docker-compose up`
+
+We are using Druid with mode `micro-quickstart` is sized for small machines like laptops and is intended for quick evaluation use-cases.
+[For more detail](https://druid.apache.org/docs/latest/operations/single-server/#single-server-reference-configurations-deprecated)
 
 **Usage**
 
@@ -80,6 +103,12 @@ This repo gives an introduction to setting up streaming analytics using open sou
   ![](./public/superset.png)
 
 ### Screenshots
+
+![](./public/ScreenShot1.png)
+
+![](./public/ScreenShot2.png)
+
+![](./public/ScreenShot3.png)
 
 # License
 
