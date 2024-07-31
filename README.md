@@ -60,7 +60,7 @@ We are using Druid with mode `micro-quickstart` is sized for small machines like
 
 |        Service        |          URL           |                 User/Password                  |
 | :-------------------: | :--------------------: | :--------------------------------------------: |
-| Druid Unified Console | http://localhost:8098/ |                      None                      |
+| Druid Unified Console | http://localhost:8088/ |                      None                      |
 | Druid Legacy Console  | http://localhost:8081/ |                      None                      |
 |       Superset        | http://localhost:3088/ |  docker exec -it superset bash superset-init   |
 |       Metabase        | http://localhost:3000/ |                      None                      |
@@ -109,6 +109,8 @@ We are using Druid with mode `micro-quickstart` is sized for small machines like
 ![](./public/ScreenShot2.png)
 
 ![](./public/ScreenShot3.png)
+
+![](./public/ScreenShot4.png)
 
 # License
 

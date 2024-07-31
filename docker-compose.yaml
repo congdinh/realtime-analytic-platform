@@ -179,34 +179,34 @@ services:
       timeout: 5s
       retries: 5
 
-  superset:
-    image: amancevice/superset:latest
-    container_name: superset
-    restart: unless-stopped
-    ports:
-      - 3088:8088
+  # superset:
+  #   image: amancevice/superset:latest
+  #   container_name: superset
+  #   restart: unless-stopped
+  #   ports:
+  #     - 3088:8088
 
-  # Airflow sequency need change to celery on product
-  airflow:
-    build:
-      context: ./app_airflow/
-      dockerfile: ./Dockerfile.py37
-    image: realtime-analytic-platform/airflow:local
-    container_name: airflow
-    restart: unless-stopped
-    depends_on:
-      - kafka
-    volumes:
-      - ./app_airflow/app/:/airflow/
-    environment:
-      - AIRFLOW_HOME=/airflow
-      - AIRFLOW_UID=50000
-    ports:
-      - 3080:8080
+  # # Airflow sequency need change to celery on product
+  # airflow:
+  #   build:
+  #     context: ./app_airflow
+  #     dockerfile: ./Dockerfile.py37
+  #   image: realtime-analytic-platform/airflow:local
+  #   container_name: airflow
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - kafka
+  #   volumes:
+  #     - ./app_airflow/app/:/airflow/
+  #   environment:
+  #     - AIRFLOW_HOME=/airflow
+  #     - AIRFLOW_UID=50000
+  #   ports:
+  #     - 3080:8080
 
-  # Redis for Airflow
-  redis:
-    image: redis
-    restart: unless-stopped
-    volumes:
-      - app_redis:/data
+  # # Redis for Airflow
+  # redis:
+  #   image: redis
+  #   restart: unless-stopped
+  #   volumes:
+  #     - app_redis:/data
