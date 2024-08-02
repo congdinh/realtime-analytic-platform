@@ -14,7 +14,7 @@ This repo gives an introduction to setting up streaming analytics using open sou
 
 - This project uses Docker Compose to orchestrate a multi-container environment for a data analytics platform. The setup includes PostgreSQL, Apache Druid, Kafka, Metabase, Superset, Airflow, and Redis, each running in separate containers.
 
-**View System**
+**Flow System**
 
 ![](./public/kafka-druid-metabase-dataflow.png)
 
@@ -111,6 +111,41 @@ We are using Druid with mode `micro-quickstart` is sized for small machines like
 ![](./public/ScreenShot3.png)
 
 ![](./public/ScreenShot4.png)
+
+## Complex Dependencies
+
+Druid is a fairly complex product to set up. Getting it working right is not easy, and the dependencies that can cause it to break are numerous.
+
+This section is not a complete overview of druid, but a high-level introduction to the components and, most importantly, how they coordinate. Understanding how they coordinate can help you avoid the many problems we have had getting it up and running.
+
+Druid is composed of 5 key node types:
+
+- overlord
+- coordinator
+- historical - handles analysis and searches on historical data
+- real-time - handles analysis requests on real-time data and indexes data as it comes in
+- broker - brokers incoming analysis requests to appropriate historical or real-time nodes
+
+In short:
+
+1. Data comes in
+2. Data is handed to a real-time node
+3. Real-time node indexes it and saves the indexed data to "deep storage"
+4. Real-time node handles analysis requests as long as it is within the "real-time window"
+5. Historical node uses indexed data to answer historical analysis requests
+
+In practice, a sixth node type exists, the middlemanager. The middlemanager is responsible for creating and scaling real-time indexing workers on the fly. Thus, incoming data causes the middlemanager to create a local worker task to index the data.
+
+The docker image is able to function in any of the 5 modes: overlord, coordinator, broker, historical, middlemanager.
+
+### Coordination
+
+Since these components depend upon each other and communicate, it is important to understand what they must share in order to function.
+
+- Metadata: Metadata is stored in a single database and is accessed _only_ by coordinator nodes. In a simple setup with a single coordinator, you can use a local filesystem database, e.g. Derby. For real clusters, use real databases such as postgres. In this sample's compose, we use postgres.
+- Deep storage: Deep storage is where the actual data is stored. Real-time nodex index the data and save the indexed data as segments in deep storage. Supported deep storage are: AWS S3, HDFS, local file. Because local file must be shared across multiple nodes, it only works if it is a shared mount. In the sample compose for this project, we use file-type storage and mount a shared volume across all containers. For production, you probably should use HDFS or S3.
+- Indexing logs: While creating indexes, real-time nodes record logs as files. Like deep storage, these must be accessible to multiple nodes. Supported storage are the same as deep storage: AWS S3, HDFS, local file. In the sample compose for this project, we use file-type storage and mount a shared volume across all containers. For production, you probavbly should use HDFS or S3.
+- Zookeeper: Zookeeper is used to locate cluster nodes. It uses standard zookeeper protocols for connecting and communicating.
 
 # License
 
